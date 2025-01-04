@@ -69,6 +69,9 @@ mcstatus = "^11.1.1"
 qq-botpy = "^1.2.1"
 botpy = {git = "https://github.com/Teahouse-Studios/botpy.git"}
 tomlkit = "^0.13.2"
+cattrs = "^24.1.2"
+argon2-cffi = "^23.1.0"
+slowapi = "^0.1.9"
 
 
 [tool.poetry.group.dev.dependencies]
