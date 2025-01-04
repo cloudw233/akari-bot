@@ -52,7 +52,7 @@ async def generate_screenshot_v2(
                 timeout=30,
                 request_private_ip=True,
             )
-        except Exception:
+        except aiohttp.ClientConnectorError:
             if use_local:
                 return await generate_screenshot_v2(
                     page_link,
@@ -61,7 +61,9 @@ async def generate_screenshot_v2(
                     content_mode,
                     use_local=False,
                 )
-            Logger.error("[WebRender] Generation Failed.")
+            return False
+        except ValueError:
+            Logger.info("[WebRender] Generation Failed.")
             return False
     else:
         Logger.info("[WebRender] Generating section screenshot...")
@@ -77,7 +79,7 @@ async def generate_screenshot_v2(
                 timeout=30,
                 request_private_ip=True,
             )
-        except Exception:
+        except aiohttp.ClientConnectorError:
             if use_local:
                 return await generate_screenshot_v2(
                     page_link,
@@ -86,7 +88,9 @@ async def generate_screenshot_v2(
                     content_mode,
                     use_local=False,
                 )
-            Logger.error("[WebRender] Generation Failed.")
+            return False
+        except ValueError:
+            Logger.info("[WebRender] Generation Failed.")
             return False
     with open(img) as read:
         load_img = json.loads(read.read())
@@ -115,7 +119,7 @@ async def generate_screenshot_v1(
                 page_link, timeout=aiohttp.ClientTimeout(total=20)
             ) as req:
                 html = await req.read()
-        except Exception:
+        except BaseException:
             Logger.error(traceback.format_exc())
             return False
         soup = BeautifulSoup(html, "html.parser")
@@ -285,7 +289,7 @@ async def generate_screenshot_v1(
                         if selected:
                             break
                 if not selected:
-                    Logger.info("Nothing found.")
+                    Logger.info("Found nothing...")
                     return False
                 Logger.info("Found section...")
                 open_file.write(str(x))
@@ -348,7 +352,7 @@ async def generate_screenshot_v1(
                 data=json.dumps(html),
             ) as resp:
                 if resp.status != 200:
-                    Logger.error(f"Failed to render: {await resp.text()}")
+                    Logger.info(f"Failed to render: {await resp.text()}")
                     return False
                 imgs_data = json.loads(await resp.read())
                 for img in imgs_data:
@@ -367,7 +371,7 @@ async def generate_screenshot_v1(
                     data=json.dumps(html),
                 ) as resp:
                     if resp.status != 200:
-                        Logger.error(f"Failed to render: {await resp.text()}")
+                        Logger.info(f"Failed to render: {await resp.text()}")
                         return False
                     imgs_data = json.loads(await resp.read())
                     for img in imgs_data:

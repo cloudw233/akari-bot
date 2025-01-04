@@ -43,12 +43,14 @@ async def make_screenshot(page_link, use_local=True):
                 bimg = PILImage.open(bio)
                 img_lst.append(bimg)
             return img_lst
-        Logger.error("[WebRender] Generation Failed.")
+        Logger.info("[WebRender] Generation Failed.")
         return False
-    except Exception:
+    except aiohttp.ClientConnectorError:
         if use_local:
             return await make_screenshot(page_link, use_local=False)
-        Logger.error("[WebRender] Generation Failed.")
+        return False
+    except ValueError:
+        Logger.info("[WebRender] Generation Failed.")
         return False
 
 
