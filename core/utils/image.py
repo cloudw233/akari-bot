@@ -90,7 +90,6 @@ async def msgchain2image(message_chain: Union[List, MessageChain],
     d = {'content': html_content, 'element': '.botbox'}
     html_ = json.dumps(d)
 
-    Logger.info("[WebRender] Converting message chain...")
     try:
         pic = await download(webrender('element_screenshot', use_local=use_local),
                              status_code=200,
@@ -101,23 +100,17 @@ async def msgchain2image(message_chain: Union[List, MessageChain],
                              timeout=30,
                              request_private_ip=True
                              )
-    except Exception:
+    except aiohttp.ClientConnectorError:
         if use_local:
-            try:
-                pic = await download(webrender('element_screenshot', use_local=False),
-                                     status_code=200,
-                                     headers={'Content-Type': 'application/json'},
-                                     method="POST",
-                                     post_data=html_,
-                                     attempt=1,
-                                     timeout=30,
-                                     request_private_ip=True
-                                     )
-            except Exception:
-                Logger.error('[WebRender] Generation Failed.')
-                return False
+            pic = await download(webrender('element_screenshot', use_local=False),
+                                 status_code=200,
+                                 method='POST',
+                                 headers={'Content-Type': 'application/json'},
+                                 post_data=html_,
+                                 request_private_ip=True
+                                 )
         else:
-            Logger.error('[WebRender] Generation Failed.')
+            Logger.info('[WebRender] Generation Failed.')
             return False
 
     with open(pic) as read:
@@ -166,23 +159,17 @@ async def svg_render(file_path: str, use_local: bool = True) -> Union[List[PILIm
                              timeout=30,
                              request_private_ip=True
                              )
-    except Exception:
+    except aiohttp.ClientConnectorError:
         if use_local:
-            try:
-                pic = await download(webrender('element_screenshot', use_local=False),
-                                     status_code=200,
-                                     headers={'Content-Type': 'application/json'},
-                                     method="POST",
-                                     post_data=html_,
-                                     attempt=1,
-                                     timeout=30,
-                                     request_private_ip=True
-                                     )
-            except Exception:
-                Logger.error('[WebRender] Generation Failed.')
-                return False
+            pic = await download(webrender('element_screenshot', use_local=False),
+                                 status_code=200,
+                                 method='POST',
+                                 headers={'Content-Type': 'application/json'},
+                                 post_data=html_,
+                                 request_private_ip=True
+                                 )
         else:
-            Logger.error('[WebRender] Generation Failed.')
+            Logger.info('[WebRender] Generation Failed.')
             return False
 
     with open(pic) as read:

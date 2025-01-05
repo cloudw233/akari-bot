@@ -1,7 +1,8 @@
 import platform
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta, UTC
 
+import jwt
 import psutil
 from cpuinfo import get_cpu_info
 
@@ -12,6 +13,8 @@ from core.constants import locale_url_default
 from core.database import BotDBUtil
 from core.utils.i18n import get_available_locales, Locale, load_locale_file
 from core.utils.info import Info
+
+jwt_secret = Config("jwt_secret", cfg_type=str, secret=True, table_name="bot_api")
 
 ver = module("version", base=True, doc=True)
 
@@ -342,3 +345,23 @@ async def _(msg: Bot.MessageSession):
         await msg.call_api("set_group_leave", group_id=msg.session.target)
     else:
         await msg.finish()
+
+
+token = module("token", base=True, hidden=True)
+
+
+@token.command("<code> {{core.help.token}}")
+async def _(msg: Bot.MessageSession, code: str):
+    await msg.finish(
+        jwt.encode(
+            {
+                "exp": datetime.now(UTC)
+                + timedelta(seconds=60 * 60 * 24 * 7),  # 7 days
+                "iat": datetime.now(UTC),
+                "senderId": msg.target.sender_id,
+                "code": code,
+            },
+            bytes(jwt_secret, "utf-8"),
+            algorithm="HS256",
+        )
+    )

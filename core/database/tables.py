@@ -2,11 +2,10 @@ from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, Boolean, text
 from sqlalchemy.dialects.mysql import LONGTEXT
 
 from core.config import Config
-from core.database.orm import Session
-from core.database.link import db_type
+from core.database.orm import Session, DB_LINK
 from core.database.orm_base import Base
 
-is_mysql = db_type == "mysql"
+is_mysql = DB_LINK.startswith("mysql")
 default_locale = Config("default_locale", cfg_type=str)
 
 
@@ -104,6 +103,19 @@ class JobQueueTable(Base):
 
     __table_args__ = {"mysql_charset": "utf8mb4"}
 
+class InfoServers(Base):
+    __tablename__ = "info_servers"
+    from_target = Column(String(512), primary_key=True)
+    servers = Column(String(1024))
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+
+class HaofsAccount(Base):
+    __tablename__ = "haofs_account"
+    from_sender = Column(String(512), primary_key=True)
+    email = Column(String(512))
+    password = Column(String(512))
+    __table_args__ = {'mysql_charset': 'utf8mb4'}
+
 
 Session.create()
 __all__ = [
@@ -116,4 +128,6 @@ __all__ = [
     "AnalyticsData",
     "UnfriendlyActionsTable",
     "JobQueueTable",
+    "InfoServers", 
+    "HaofsAccount"
 ]
